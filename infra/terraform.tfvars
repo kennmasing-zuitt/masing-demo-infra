@@ -25,6 +25,7 @@ image_tags = {
   "auth-app-client"          = "sha-fde72b7"
   "kisetsu-scheduler-server" = "sha-ff33685"
   "kisetsu-scheduler-client" = "sha-0ee9584"
+  "b40-capstone1-revamp"     = "sha-PENDING" # set after b40-capstone1-revamp PR #1 publishes the image
 }
 
 # One conf.d/<key>.conf each, from files/site.conf.tftpl. Sites needing custom routing:
@@ -41,6 +42,10 @@ simple_sites = {
   airline-booking-system = {
     host     = "airline-booking-system.masings.com"
     upstream = "airline-booking-system:80"
+  }
+  altmobility = {
+    host     = "altmobility.masings.com"
+    upstream = "altmobility:80"
   }
 }
 
