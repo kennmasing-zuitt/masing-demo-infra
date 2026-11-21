@@ -26,3 +26,5 @@ networks:
 
 volumes:
   letsencrypt:
+    name: proxy_letsencrypt
+    external: true       # created by bin/certs.sh bootstrap before Nginx starts

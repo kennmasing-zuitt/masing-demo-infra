@@ -8,32 +8,13 @@ services:
         environment:
             NODE_ENV: production
             PORT: 2200
-            MONGO_URI: $${DOCKER_MONGO_URI:-mongodb://mongo:27017/kisetsu-scheduler}
+            MONGO_URI: $${DOCKER_MONGO_URI:?set DOCKER_MONGO_URI (Atlas) in .env}
             CORS_ORIGINS: $${DOCKER_CORS_ORIGINS:-https://scheduling.masings.com}
             TRUST_PROXY: 1
-        depends_on:
-            mongo:
-                condition: service_healthy
         networks:
             default:
             web:
                 aliases: [kisetsu-scheduler-server]
-    mongo:
-        image: mongo:8
-        container_name: kisetsu-scheduler-mongo
-        restart: unless-stopped
-        volumes:
-            - mongo-data:/data/db
-        healthcheck:
-            test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-            start_period: 20s
-        networks:
-            default:
-volumes:
-    mongo-data:
 networks:
     web:
         external: true # shared with the Nginx proxy
