@@ -17,15 +17,15 @@ deploy_host = "masing-demo"
 
 # GHCR tags built by each app repo's "Publish image" workflow (sha-<7-char commit>)
 image_tags = {
-  "portfolio"                = "sha-76f6f02"
+  "portfolio"                = "sha-2d2265c"
   "kisetsuspa-web"           = "sha-1b80f74"
-  "airline-booking-system"   = "sha-6045e42"
+  "airline-booking-system"   = "sha-6f593a8"
   "masings-calculator"       = "sha-85eb9ed"
   "auth-app-server"          = "sha-fde72b7"
   "auth-app-client"          = "sha-fde72b7"
   "kisetsu-scheduler-server" = "sha-ff33685"
   "kisetsu-scheduler-client" = "sha-0ee9584"
-  "b40-capstone1-revamp"     = "sha-ae2af2e"
+  "b40-capstone1-revamp"     = "sha-868911d"
 }
 
 # One conf.d/<key>.conf each, from files/site.conf.tftpl. Sites needing custom routing:
