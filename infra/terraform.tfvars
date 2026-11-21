@@ -17,7 +17,7 @@ deploy_host = "masing-demo"
 
 # GHCR tags built by each app repo's "Publish image" workflow (sha-<7-char commit>)
 image_tags = {
-  "portfolio"                = "sha-0ea2c66"
+  "portfolio"                = "1.1.0"
   "kisetsuspa-web"           = "sha-1b80f74"
   "airline-booking-system"   = "sha-6f593a8"
   "masings-calculator"       = "sha-85eb9ed"
