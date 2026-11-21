@@ -1,0 +1,12 @@
+name: b40-capstone1-revamp
+services:
+  web:
+    image: ${images["b40-capstone1-revamp"]}
+    restart: unless-stopped
+    networks:
+      web:
+        aliases: [altmobility]   # the name used in the proxy config
+    mem_limit: 64m
+networks:
+  web:
+    external: true             # shared with the Nginx proxy
