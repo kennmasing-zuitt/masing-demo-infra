@@ -1,0 +1,38 @@
+name: auth-app
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: $${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    networks: [default]            # private: only this project can reach it
+  server:
+    image: ${images["auth-app-server"]}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MONGO_URI: mongodb://$${MONGO_ROOT_USER}:$${MONGO_ROOT_PASSWORD}@mongo:27017/$${MONGO_DB}?authSource=admin
+      PORT: 4000
+    depends_on:
+      - mongo
+    networks:
+      default:
+      web:
+        aliases: [auth-app-server]
+  client:
+    image: ${images["auth-app-client"]}  # built with API_URL=http://auth-app-server:4000
+    restart: unless-stopped
+    depends_on:
+      - server
+    networks:
+      default:
+      web:
+        aliases: [auth-app-client]
+networks:
+  web:
+    external: true                 # shared with the Nginx proxy
+volumes:
+  mongo-data:

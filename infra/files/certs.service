@@ -1,0 +1,7 @@
+[Unit]
+Description=Renew or expand the Let's Encrypt certificate
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/srv/bin/certs.sh

@@ -1,0 +1,12 @@
+name: portfolio
+services:
+  web:
+    image: ${images["portfolio"]}
+    restart: unless-stopped
+    networks:
+      web:
+        aliases: [portfolio]   # the name used in the proxy config
+    mem_limit: 64m
+networks:
+  web:
+    external: true             # shared with the Nginx proxy

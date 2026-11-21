@@ -1,0 +1,16 @@
+name: kisetsuspa-scheduler
+services:
+    app:
+        # built with NEXT_PUBLIC_GRAPHQL_URL=https://scheduling-api.masings.com/graphql
+        image: ${images["kisetsu-scheduler-client"]}
+        container_name: nextjs-redux-boilerplate-client
+        restart: unless-stopped
+        environment:
+            NODE_ENV: production
+        networks:
+            default:
+            web:
+                aliases: [nextjs-redux-boilerplate-client]
+networks:
+    web:
+        external: true # shared with the Nginx proxy

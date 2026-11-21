@@ -1,0 +1,28 @@
+name: proxy
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - letsencrypt:/etc/letsencrypt:ro
+    networks: [web]
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+    profiles: [tools]        # only runs when you call it
+
+networks:
+  web:
+    external: true
+
+volumes:
+  letsencrypt:

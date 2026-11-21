@@ -1,0 +1,15 @@
+name: masings-calculator
+services:
+  app:
+    image: ${images["masings-calculator"]}
+    container_name: masings-calculator
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    networks:
+      default:
+      web:
+        aliases: [masings-calculator]
+networks:
+  web:
+    external: true                 # shared with the Nginx proxy

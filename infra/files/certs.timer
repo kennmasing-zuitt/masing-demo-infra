@@ -1,0 +1,10 @@
+[Unit]
+Description=Check the Let's Encrypt certificate twice a day
+
+[Timer]
+OnCalendar=*-*-* 03,15:15
+RandomizedDelaySec=15m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

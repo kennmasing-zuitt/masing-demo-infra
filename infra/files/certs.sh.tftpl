@@ -1,0 +1,58 @@
+#!/bin/bash
+# One Let's Encrypt certificate (${cert_name}) for every site on this droplet.
+#   certs.sh bootstrap  before Nginx starts: a self-signed stand-in if there is no certificate yet
+#   certs.sh            renew it, or (re)issue it once every name resolves here (timer + each deploy)
+set -euo pipefail
+
+cert=${cert_name}
+hosts=(${join(" ", hosts)})
+le=/var/lib/docker/volumes/proxy_letsencrypt/_data
+compose=(docker compose -f /srv/proxy/compose.yaml)
+
+covers_all() {
+    [ -s "$le/live/$cert/cert.pem" ] || return 1
+    local san
+    san=$(openssl x509 -noout -ext subjectAltName -in "$le/live/$cert/cert.pem")
+    for h in "$${hosts[@]}"; do grep -q "DNS:$h\b" <<<"$san" || return 1; done
+}
+
+if [ "$${1:-}" = bootstrap ]; then
+    docker volume create proxy_letsencrypt >/dev/null
+    if [ ! -s "$le/live/$cert/fullchain.pem" ]; then
+        mkdir -p "$le/live/$cert"
+        openssl req -x509 -nodes -newkey rsa:2048 -days 7 -subj "/CN=bootstrap" \
+            -keyout "$le/live/$cert/privkey.pem" -out "$le/live/$cert/fullchain.pem" 2>/dev/null
+        echo "certs: self-signed stand-in created"
+    fi
+    exit 0
+fi
+
+if covers_all; then
+    rm -f "$le/.renewed"
+    "$${compose[@]}" run --rm certbot renew --quiet --deploy-hook "touch /etc/letsencrypt/.renewed"
+    if [ -e "$le/.renewed" ]; then
+        "$${compose[@]}" exec -T nginx nginx -s reload
+        echo "certs: renewed"
+    fi
+    exit 0
+fi
+
+# Missing a name (new site) or still the stand-in: only ask Let's Encrypt once DNS is right,
+# so failed validations never count against the rate limits
+for h in "$${hosts[@]}"; do
+    if ! dig +short A "$h" @1.1.1.1 | grep -qx "${public_ip}"; then
+        echo "certs: waiting for DNS: $h does not point to ${public_ip} yet"
+        exit 0
+    fi
+done
+
+# A stand-in is not a certbot lineage; clear it so certbot can create the real one
+[ -e "$le/renewal/$cert.conf" ] || rm -rf "$le/live/$cert"
+
+domains=()
+for h in "$${hosts[@]}"; do domains+=(-d "$h"); done
+"$${compose[@]}" run --rm certbot certonly --webroot -w /var/www/certbot \
+    --cert-name "$cert" --expand "$${domains[@]}" \
+    --email ${certbot_email} --agree-tos --no-eff-email --non-interactive
+"$${compose[@]}" exec -T nginx nginx -s reload
+echo "certs: issued $cert for $${hosts[*]}"

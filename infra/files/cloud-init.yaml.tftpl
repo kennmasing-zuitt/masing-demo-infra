@@ -1,0 +1,40 @@
+#cloud-config
+# First boot only (user_data changes are ignored afterwards; files and apps come from the deploy step).
+package_update: true
+packages:
+  - ca-certificates
+  - curl
+  - bind9-dnsutils
+  - python3
+users:
+  - name: kenneth
+    shell: /bin/bash
+    groups: [sudo]
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+%{ for k in kenneth_keys ~}
+      - ${k}
+%{ endfor ~}
+  - name: hermes
+    shell: /bin/bash
+    groups: [sudo]
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+%{ for k in hermes_keys ~}
+      - ${k}
+%{ endfor ~}
+write_files:
+  - path: /etc/ssh/sshd_config.d/00-disable-root-login.conf
+    content: "PermitRootLogin no\n"
+  - path: /root/.tailscale-authkey
+    permissions: "0600"
+    content: ${jsonencode(tailscale_auth_key)}
+runcmd:
+  - [sh, -c, "curl -fsSL https://get.docker.com | sh"]
+  - [sh, -c, "usermod -aG docker kenneth && usermod -aG docker hermes"]
+  - [sh, -c, "fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab"]
+  - [sh, -c, "systemctl try-reload-or-restart ssh"]
+  # Join the tailnet (the only way in over SSH), then delete the key whatever happens
+  - [sh, -c, "curl -fsSL https://tailscale.com/install.sh | sh && tailscale up --auth-key=file:/root/.tailscale-authkey --hostname=${hostname}; rc=$?; rm -f /root/.tailscale-authkey; exit $rc"]

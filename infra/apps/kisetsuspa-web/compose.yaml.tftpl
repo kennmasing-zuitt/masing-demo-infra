@@ -1,0 +1,12 @@
+name: kisetsuspa
+services:
+  web:
+    image: ${images["kisetsuspa-web"]}
+    restart: unless-stopped
+    networks:
+      web:
+        aliases: [kisetsuspa]   # the name used in the proxy config
+    mem_limit: 64m
+networks:
+  web:
+    external: true             # shared with the Nginx proxy
