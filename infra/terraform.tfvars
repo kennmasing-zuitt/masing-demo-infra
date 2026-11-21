@@ -25,7 +25,7 @@ image_tags = {
   "auth-app-client"          = "sha-fde72b7"
   "kisetsu-scheduler-server" = "sha-ff33685"
   "kisetsu-scheduler-client" = "sha-0ee9584"
-  "b40-capstone1-revamp"     = "sha-PENDING" # set after b40-capstone1-revamp PR #1 publishes the image
+  "b40-capstone1-revamp"     = "sha-ae2af2e"
 }
 
 # One conf.d/<key>.conf each, from files/site.conf.tftpl. Sites needing custom routing:
