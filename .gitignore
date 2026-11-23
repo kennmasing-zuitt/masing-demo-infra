@@ -2,5 +2,6 @@
 *.tfstate
 *.tfstate.*
 tfplan
+# Credentials live in Secret Manager (POS-255); keep the old paths ignored so a leftover copy is never committed
 .env
 secrets/

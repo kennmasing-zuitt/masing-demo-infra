@@ -14,5 +14,5 @@ terraform {
   }
 }
 
-# Token from DIGITALOCEAN_TOKEN (scripts/tf.sh loads it from .env)
+# Token from DIGITALOCEAN_TOKEN (scripts/tf.sh loads it from the secret masings-tf-zuitt-demo-infra-env)
 provider "digitalocean" {}
