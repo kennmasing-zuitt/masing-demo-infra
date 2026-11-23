@@ -3,7 +3,10 @@
 Terraform for the zuitt-demo droplet (sgp1): one Nginx proxy container in front of
 Docker Compose apps, images from GHCR, SSH over Tailscale only.
 
-Runs on agentic-loop (user `masings`, `~/projects/zuitt-demo-infra`), where the state lives.
+Runs on agentic-loop (user `masings`, `~/projects/zuitt-demo-infra`). The state lives in the GCS
+bucket `gs://masings-tfstate` (prefix `zuitt-demo-infra/infra`); `scripts/tf.sh` reads it with the
+`masings-tf-state` key in `~/.config/masings-secrets/`. Rebuilding the box: masings repo README,
+"Rebuilding agentic-loop".
 
 ```
 infra/
