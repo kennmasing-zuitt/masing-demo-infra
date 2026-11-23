@@ -2,7 +2,7 @@ terraform {
   # Credentials: scripts/tf.sh sets GOOGLE_BACKEND_CREDENTIALS
   backend "gcs" {
     bucket = "masings-tfstate"
-    prefix = "zuitt-demo-infra/infra"
+    prefix = "masing-demo-infra/infra"
   }
 
   required_version = ">= 1.6"
@@ -14,5 +14,5 @@ terraform {
   }
 }
 
-# Token from DIGITALOCEAN_TOKEN (scripts/tf.sh loads it from the secret masings-tf-zuitt-demo-infra-env)
+# Token from DIGITALOCEAN_TOKEN (scripts/tf.sh loads it from the secret masings-tf-masing-demo-infra-env)
 provider "digitalocean" {}
