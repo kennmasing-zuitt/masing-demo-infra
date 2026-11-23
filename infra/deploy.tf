@@ -41,10 +41,10 @@ locals {
     },
   )
 
-  # App secrets: secrets/<app>.env on the Terraform machine (gitignored) => /srv/apps/<app>/.env
+  # App secrets: <app>.env in var.app_env_files (from Secret Manager, scripts/tf.sh) => /srv/apps/<app>/.env
   secret_files = {
-    for f in fileset("${path.root}/../secrets", "*.env") :
-    "/srv/apps/${trimsuffix(f, ".env")}/.env" => file("${path.root}/../secrets/${f}")
+    for f, content in var.app_env_files :
+    "/srv/apps/${trimsuffix(f, ".env")}/.env" => content
   }
 }
 
@@ -52,15 +52,15 @@ resource "terraform_data" "deploy" {
   lifecycle {
     precondition {
       condition     = alltrue([for p in keys(local.secret_files) : contains([for a in local.apps : "/srv/apps/${a}/.env"], p)])
-      error_message = "Every secrets/<name>.env must match an app folder under infra/apps/."
+      error_message = "Every <name>.env in app_env_files must match an app folder under infra/apps/."
     }
   }
 
-  # Re-run when the droplet, a file or a secret changes (secrets only as a hash)
+  # Re-run when the droplet, a file or a secret changes (secrets only as a hash, which is safe to show)
   triggers_replace = [
     digitalocean_droplet.main.id,
     sha1(jsonencode(local.files)),
-    sha1(jsonencode(local.secret_files)),
+    nonsensitive(sha1(jsonencode(local.secret_files))),
   ]
 
   depends_on = [
