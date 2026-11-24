@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Run Terraform for zuitt-demo with the right credentials.
+# Run Terraform for masing-demo with the right credentials.
 #   scripts/tf.sh plan|apply|output|state|... [args...]
 #
 # Credentials come only from GCP Secret Manager (project masings-secrets), read with the
 # masings-tf-reader key in ~/.config/masings-secrets/; never from files or your environment.
 # Change them with the masings repo's infra/gcp/secrets.sh (masings README "Credentials"):
-#   masings-tf-zuitt-demo-infra-env       DIGITALOCEAN_TOKEN=... (zuitt-demo's own token), plus
+#   masings-tf-masing-demo-infra-env       DIGITALOCEAN_TOKEN=... (masing-demo's own token), plus
 #                                         TF_VAR_tailscale_auth_key=... only while creating the droplet
-#   masings-tf-zuitt-demo-infra-apps-env  JSON map {"<app>.env": "<content>"}: each app's runtime
+#   masings-tf-masing-demo-infra-apps-env  JSON map {"<app>.env": "<content>"}: each app's runtime
 #                                         .env, copied to /srv/apps/<app>/.env
 # State: GCS backend in infra/versions.tf, read and written with the masings-tf-state key
 # (masings repo README, "Rebuilding agentic-loop")
@@ -54,7 +54,7 @@ fetch() {
 unset DIGITALOCEAN_ACCESS_TOKEN DIGITALOCEAN_TOKEN
 for v in ${!TF_VAR_@}; do unset "$v"; done
 
-env="$(fetch masings-tf-zuitt-demo-infra-env)"
+env="$(fetch masings-tf-masing-demo-infra-env)"
 # Only the keys this secret may hold, each with a non-empty token value; anything else is refused before
 # anything is exported, and nothing is ever evaluated (so a line can't run a command or set
 # TF_CLI_ARGS_*, BASH_ENV, LD_PRELOAD ...). Same rules as the masings repo's scripts/secrets-env.sh
@@ -67,20 +67,20 @@ while IFS= read -r line; do
     n=$((n + 1))
     [[ "$line" =~ $blank_re ]] && continue
     [[ "$line" =~ $line_re ]] \
-        || die "Secret masings-tf-zuitt-demo-infra-env, line $n: not an allowed KEY=token"
-    [[ " ${names[*]-} " != *" ${BASH_REMATCH[1]} "* ]] || die "Secret masings-tf-zuitt-demo-infra-env, line $n: ${BASH_REMATCH[1]} set twice"
+        || die "Secret masings-tf-masing-demo-infra-env, line $n: not an allowed KEY=token"
+    [[ " ${names[*]-} " != *" ${BASH_REMATCH[1]} "* ]] || die "Secret masings-tf-masing-demo-infra-env, line $n: ${BASH_REMATCH[1]} set twice"
     names+=("${BASH_REMATCH[1]}") values+=("${BASH_REMATCH[2]}")
 done < <(printf '%s\n' "$env")
 for i in "${!names[@]}"; do export "${names[$i]}=${values[$i]}"; done
-[ -n "${DIGITALOCEAN_TOKEN:-}" ] || die "masings-tf-zuitt-demo-infra-env must set DIGITALOCEAN_TOKEN"
+[ -n "${DIGITALOCEAN_TOKEN:-}" ] || die "masings-tf-masing-demo-infra-env must set DIGITALOCEAN_TOKEN"
 
-apps="$(fetch masings-tf-zuitt-demo-infra-apps-env)"
+apps="$(fetch masings-tf-masing-demo-infra-apps-env)"
 # Terraform reads a map variable from the environment as HCL, so escape template markers (${ and %{)
 # to keep every app's .env byte for byte
 TF_VAR_app_env_files="$(jq -ec 'if type == "object" and (map_values(type == "string") | all)
     then map_values(gsub("\\$\\{"; "$${") | gsub("%\\{"; "%%{"))
     else error("must be a JSON map of file name to content") end' < <(printf '%s' "$apps"))" \
-    || die "Secret masings-tf-zuitt-demo-infra-apps-env is not a JSON map of file name to content"
+    || die "Secret masings-tf-masing-demo-infra-apps-env is not a JSON map of file name to content"
 export TF_VAR_app_env_files
 
 # Only the state key may reach the state: drop anything that would override it or redirect the backend
@@ -97,7 +97,7 @@ if [ "$cmd" = plan ] || [ "$cmd" = apply ]; then
     # A new droplet can only be reached by joining the tailnet on first boot
     resources=$(terraform -chdir="$dir" state list) || die "Cannot read the state (error above)"
     if ! grep -qx digitalocean_droplet.main <<<"$resources" && [ -z "${TF_VAR_tailscale_auth_key:-}" ]; then
-        die "The droplet will be created: add TF_VAR_tailscale_auth_key to masings-tf-zuitt-demo-infra-env first (single-use, tagged key)"
+        die "The droplet will be created: add TF_VAR_tailscale_auth_key to masings-tf-masing-demo-infra-env first (single-use, tagged key)"
     fi
 fi
 case "$cmd" in

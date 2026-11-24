@@ -73,7 +73,7 @@ variable "certbot_email" {
 }
 
 variable "app_env_files" {
-  description = "Each app's runtime .env, keyed by file name (<app>.env => /srv/apps/<app>/.env). scripts/tf.sh loads it from the secret masings-tf-zuitt-demo-infra-apps-env."
+  description = "Each app's runtime .env, keyed by file name (<app>.env => /srv/apps/<app>/.env). scripts/tf.sh loads it from the secret masings-tf-masing-demo-infra-apps-env."
   type        = map(string)
   sensitive   = true
 }
