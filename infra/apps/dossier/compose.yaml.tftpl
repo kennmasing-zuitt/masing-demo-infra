@@ -1,0 +1,21 @@
+name: dossier
+services:
+  app:
+    # Third-party image (github.com/AienTech/dossier), so it's pinned here rather than in image_tags,
+    # which only builds ghcr.io/kennmasing-zuitt/<app> names. Bump the version to upgrade.
+    image: ghcr.io/aientech/dossier:v1.15.2
+    restart: unless-stopped
+    env_file: .env                 # DOSSIER_PASSWORD, DOSSIER_SECRET, DATABASE_URL, DOSSIER_PUBLIC_URL
+    environment:
+      TZ: Asia/Manila              # nightly backups run at 03:00 server time
+    volumes:
+      - data:/data                 # SQLite file and backups; without it an upgrade deletes the data
+    networks:
+      web:
+        aliases: [dossier]         # the name used in the proxy config
+    mem_limit: 768m                # about 520 MB peak while printing PDFs (README "Performance and sizing")
+networks:
+  web:
+    external: true                 # shared with the Nginx proxy
+volumes:
+  data:
